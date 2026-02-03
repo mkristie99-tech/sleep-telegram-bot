@@ -1,0 +1,435 @@
+import asyncio
+import os
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.filters import CommandStart
+from dotenv import load_dotenv
+
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.memory import MemoryStorage
+
+last_age_storage = {}
+
+class SleepTest(StatesGroup):
+    age = State()
+    q2 = State()
+    q3 = State()
+    q4 = State()
+    q5 = State()
+    q6 = State()
+    q7 = State()
+    q8 = State()
+    q9 = State()
+
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher(storage=MemoryStorage())
+
+@dp.message(CommandStart())
+async def start(message: Message, state: FSMContext):
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="0–3 месяца")],
+            [KeyboardButton(text="4–6 месяцев")],
+            [KeyboardButton(text="7–9 месяцев")],
+            [KeyboardButton(text="10–12 месяцев")],
+            [KeyboardButton(text="13–18 месяцев")],
+            [KeyboardButton(text="19–24 месяца")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 1.\nУкажите возраст вашего ребёнка:",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.age)
+
+
+@dp.message(SleepTest.age)
+async def process_age(message: Message, state: FSMContext):
+    await state.update_data(age=message.text)
+    last_age_storage [message.from_user.id] = message.text
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")],
+            [KeyboardButton(text="Не знаю")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 2.\nВысыпает ли ребёнок свою дневную норму?",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q2)
+
+
+@dp.message(SleepTest.q2)
+async def process_q2(message: Message, state: FSMContext):
+    if message.text == "Не знаю":
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="Да")],
+                [KeyboardButton(text="Нет")],
+                [KeyboardButton(text="Не знаю")]
+            ],
+            resize_keyboard=True
+        )
+
+        await message.answer(
+            SLEEP_TABLE,
+            reply_markup=keyboard
+        )
+        return
+
+    await state.update_data(q2=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")],
+            [KeyboardButton(text="Не знаю")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 3.\n"
+        "Высыпает ли ребёнок свою ночную норму сна?",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q3)
+
+@dp.message(SleepTest.q3)
+async def process_q3(message: Message, state: FSMContext):
+    if message.text == "Не знаю":
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="Да")],
+                [KeyboardButton(text="Нет")],
+                [KeyboardButton(text="Не знаю")]
+            ],
+            resize_keyboard=True
+        )
+
+        await message.answer(
+            SLEEP_TABLE,
+            reply_markup=keyboard
+        )
+        return
+
+    await state.update_data(q3=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")],
+            [KeyboardButton(text="Не знаю")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 4.\n"
+        "Выдерживает ли ребёнок свою норму времени бодрствования?",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q4)
+
+@dp.message(SleepTest.q4)
+async def process_q4(message: Message, state: FSMContext):
+    if message.text == "Не знаю":
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="Да")],
+                [KeyboardButton(text="Нет")],
+                [KeyboardButton(text="Не знаю")]
+            ],
+            resize_keyboard=True
+        )
+
+        await message.answer(
+            SLEEP_TABLE,
+            reply_markup=keyboard
+        )
+        return
+
+    await state.update_data(q4=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")],
+            [KeyboardButton(text="Не всегда")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 5.\n"
+        "Легко ли ребёнок засыпает?\n"
+        "Нормой считается засыпание продолжительностью не более 20 минут с начала времени укладывания, без плача и раздражения.",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q5)
+
+@dp.message(SleepTest.q5)
+async def process_q5(message: Message, state: FSMContext):
+    await state.update_data(q5=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Ребенок чаще спокойный, в хорошем настроении")],
+            [KeyboardButton(text="Ребенок чаще капризничает, но быстро переключается и успокаивается")],
+            [KeyboardButton(text="Малыш часто плачет, требует больше внимания")],
+            [KeyboardButton(text="Малыш раздражительный, беспокойный, в плохом настроении")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 6.\n"
+        "Поведение ребёнка после пробуждения:",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q6)
+
+@dp.message(SleepTest.q6)
+async def process_q6(message: Message, state: FSMContext):
+    await state.update_data(q6=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")],
+            [KeyboardButton(text="Редко")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 7.\n"
+        "Есть ли у ребёнка признаки болезни, апноэ сна или храпа?",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q7)
+
+@dp.message(SleepTest.q7)
+async def process_q7(message: Message, state: FSMContext):
+    await state.update_data(q7=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 8.\n"
+        "Есть ли у ребёнка короткие дневные сны\n"
+        "(Короткими дневными снами считается сон в один цикл, то есть менее 40 минут. Сон либо не продлевается, либо продлевается с трудом)?",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q8)
+
+@dp.message(SleepTest.q8)
+async def process_q8(message: Message, state: FSMContext):
+    await state.update_data(q8=message.text)
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "📌 Вопрос 9.\n"
+        "Посещает ли ваш ребёнок детский сад?\n"
+        "(проходит ли адаптацию)",
+        reply_markup=keyboard
+    )
+
+    await state.set_state(SleepTest.q9)
+
+@dp.message(SleepTest.q9)
+async def process_q9(message: Message, state: FSMContext):
+    await state.update_data(q9=message.text)
+
+    data = await state.get_data()
+    result = interpret_results(data)
+
+    await message.answer(
+        result,
+        parse_mode="Markdown",
+        reply_markup=AGE_BUTTON
+    )
+    await state.clear()
+
+@dp.message(lambda message: message.text == "📌 С чем необходимо работать в зависимости от возраста ребёнка")
+async def show_age_recommendations(message: Message):
+    user_age = last_age_storage.get(message.from_user.id)
+
+    text = AGE_RECOMMENDATIONS.get(
+        user_age,
+        "Рекомендации по возрасту не найдены."
+    )
+
+    await message.answer(
+        text,
+        parse_mode="Markdown"
+    )
+
+AGE_BUTTON = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="📌 С чем необходимо работать в зависимости от возраста ребёнка")]
+    ],
+    resize_keyboard=True
+)
+
+AGE_RECOMMENDATIONS = {
+    "0–3 месяца": (
+        "👶 *Возраст 0–4 месяца*\n\n"
+        "Ключевыми факторами сна в этом возрасте является:\n"
+        "• условия сна (темнота, тишина, температура)\n"
+        "• самочувствие ребёнка\n"
+        "• отсутствие недосыпа и перевозбуждения\n\n"
+        "❗ В этом возрасте сон ещё незрелый — это норма."
+    ),
+    "4–6 месяцев": (
+        "👶 *Возраст 5–10 месяцев*\n\n"
+        "Ключевые факторы сна:\n"
+        "• соответствие режима биологическим ритмам\n"
+        "• достаточная длительность сна\n"
+        "• формирование привычек на засыпание\n\n"
+        "✨ Именно в этом возрасте лучше всего мягко корректировать сон."
+    ),
+    "7–9 месяцев": (
+        "👶 *Возраст 5–10 месяцев*\n\n"
+        "Фокус:\n"
+        "• режим сна и бодрствования\n"
+        "• стабильное время укладывания\n"
+        "• ассоциации на засыпание"
+    ),
+    "10–12 месяцев": (
+        "👶 *Возраст 5–10 месяцев*\n\n"
+        "Фокус:\n"
+        "• переходы между снами\n"
+        "• контроль перевозбуждения\n"
+        "• привычки засыпания"
+    ),
+    "13–18 месяцев": (
+        "🧸 *Возраст 11 месяцев – 2 года*\n\n"
+        "Ключевые факторы сна:\n"
+        "• привычки на засыпание\n"
+        "• место сна\n"
+        "• способ засыпания и сна\n\n"
+        "• происходит процесс адаптации в детском саду\n"
+        "⚠️ Часто сложности связаны не с режимом, а с привычками."
+    ),
+    "19–24 месяца": (
+        "🧸 *Возраст 11 месяцев – 2 года*\n\n"
+        "Фокус:\n"
+        "• границы и ритуалы сна\n"
+        "• происходит процесс адаптации в детском саду\n"
+        "• самостоятельное засыпание\n"
+        "• стабильный режим дня"
+    ),
+}
+
+SLEEP_TABLE = (
+    "📊 Нормы сна и бодрствования:\n\n"
+    "🟢 0–3 мес — Длительность ночного сна: 9-11 часов; дневного сна: 5-7 часов, общее время сна: 14–18 часов. Время бодрствования между снами: 1 - 1:35 часа\n"
+    "🟢 4–6 мес — Длительность ночного сна: 10-12 часов; дневного сна: 3-5 часов, общее время сна: 13-17 часов. Время бодрствования между снами: 1:45-2:30 часа\n"
+    "🟢 7–9 мес — Длительность ночного сна: 10-12 часов; дневного сна: 2:30-3 часа, общее время сна: 12:30-15 часов. Время бодрствования между снами: 2:45-3:45 часа\n"
+    "🟢 10–12 мес — Длительность ночного сна: 10-12 часов; дневного сна: 2-3 часа, общее время сна: 12-15 часов. Время бодрствования между снами: 3-4:30 часа\n"
+    "🟢 13–18 мес — Длительность ночного сна: 10-12 часов; дневного сна: 1:30-2:30 часа, общее время сна: 11:30-14 часов. Время бодрствования между снами: 3-5 часов"
+    "🟢 19–24 мес — Длительность ночного сна: 10-12 часов; дневного сна: 1:30-2:30 часов, общее время сна: 11-14 часов. Время бодрствования между снами: 5-6 часов\n\n"
+    "Важно! Время сна и бодрствования могут быть индивидуальны и меняться в зависимости от количества дневных снов! Мы опираемся на общепринятые данные!\n\n"
+    "После ознакомления выберите ответ ещё раз 👇"
+)
+
+def interpret_results(data: dict) -> str:
+    red_flags = data.get("q7") in ["Да", "Иногда"]
+
+    no_count = 0
+    for key in ["q2", "q3", "q4"]:
+        if data.get(key) == "Нет":
+            no_count += 1
+
+    falling_asleep_problem = data.get("q5") in ["Нет", "Не всегда"]
+    short_naps = data.get("q8") == "Да"
+    bad_mood = data.get("q6") in [
+        "Малыш часто плачет, требует больше внимания",
+        "Малыш раздражительный, беспокойный, в плохом настроении"
+    ]
+
+    # 1. Норма сна
+    if (
+        no_count == 0
+        and not falling_asleep_problem
+        and not bad_mood
+        and not short_naps
+    ):
+        return (
+            "✅ *Норма сна*\n\n"
+            "Сон ребёнка соответствует возрастной норме:\n"
+            "• Режим выстроен правильно\n"
+            "• Засыпание спокойное, быстрое\n"
+            "• Пробуждение в хорошем настроении\n\n"
+            "Продолжайте соблюдать режим и ритуалы сна 💛"
+        )
+
+    # 2. Лёгкие нарушения
+    if no_count <= 1:
+        return (
+            "🟡 *Лёгкие нарушения сна*\n\n"
+            "Есть отдельные моменты, которые можно скорректировать:\n"
+            "• режим сна и бодрствования\n"
+            "• ритуалы перед сном\n"
+            "• длительность дневного сна\n\n"
+            "✨ В большинстве случаев хорошо поддаются коррекции."
+        )
+
+    # 3. Выраженные нарушения
+    return (
+        "🔴 *Выраженные нарушения сна*\n\n"
+        "Наблюдаются регулярные сложности:\n"
+        "• могут быть признаки перевозбуждения или недосыпа\n"
+        "• засыпает с трудом\n"
+        "• часто капризничает после сна\n\n"
+        "👩‍⚕️ Рекомендуется пересмотреть режим, место и условия сна ребенка. После базовой коррекции, если не наступают улучшения - рассмотреть консультацию специалиста по детскому сну."
+    )
+
+# 4. Тревожные сигналы
+    if red_flags:
+        return (
+            "🚨 *Тревожные сигналы*\n\n"
+            "Есть признаки болезни, апноэ сна или выраженного недосыпа.\n\n"
+            "⚠️ Рекомендуется как можно скорее показать ребёнка врачу "
+            "для исключения серьёзных нарушений сна или дыхания. Если состояние здоровья удовлетворительное, то рекомендуем вам обратиться к специалисту по детскому сну!"
+        )
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
